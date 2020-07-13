@@ -19,6 +19,7 @@ import com.david0926.safepad.Main1.MainFragment1;
 import com.david0926.safepad.Main2.MainFragment2;
 import com.david0926.safepad.Main3.MainFragment3;
 import com.david0926.safepad.databinding.ActivityMainBinding;
+import com.david0926.safepad.util.SharedPreferenceUtil;
 
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
@@ -39,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
         binding.bottomMain.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.action_1:
-                    switchFragment(MainFragment1.newInstance());
+                    if (bt.getConnectedDeviceName() != null) {
+                        switchFragment(MainFragment1.newInstanceConnected(bt.getConnectedDeviceName()));
+                    } else switchFragment(MainFragment1.newInstance());
                     break;
                 case R.id.action_2:
                     switchFragment(MainFragment2.newInstance());
@@ -59,28 +62,57 @@ public class MainActivity extends AppCompatActivity {
         }
 
         bt.setOnDataReceivedListener((data, message) -> {
-            Log.d("debug", "onCreate: "+message);
-            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            if (message.contains("time_")) {
+                Intent intent = new Intent("main_time");
+                intent.putExtra("time", message.replace("time_", ""));
+                sendBroadcast(intent);
+                SharedPreferenceUtil.putInt(this, "time",
+                        Integer.parseInt(message.replace("time_", "")));
+            }
+            if (message.contains("delta_")) {
+                Log.d("debug", "onCreate: " + message.replace("delta_", ""));
+            }
+            if (message.contains("pos_")){
+                Intent alertIntent = new Intent("main_alert");
+                alertIntent.putExtra("alert", message.contains("alert"));
+                sendBroadcast(alertIntent);
+
+                if(message.contains("alert")) {
+                    SharedPreferenceUtil.putInt(this, "alert",
+                            SharedPreferenceUtil.getInt(this, "alert", 0)+1);
+                }
+
+                String[] s = message.replace("pos_", "")
+                        .replace("alert", "").split(" ");
+
+                Intent intent = new Intent("main_pos");
+                intent.putExtra("pos1", s[0]);
+                intent.putExtra("pos2", s[1]);
+                intent.putExtra("pos3", s[2]);
+                intent.putExtra("pos4", s[3]);
+                sendBroadcast(intent);
+            }
+
+            Log.d("debug", "onCreate: " + message);
+            //Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
         });
 
         bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() { //연결됐을 때
             public void onDeviceConnected(String name, String address) {
-                Toast.makeText(MainActivity.this
-                        , "연결에 성공하였습니다.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "연결에 성공하였습니다.", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent("main_connected");
                 intent.putExtra("name", name);
                 sendBroadcast(intent);
+
             }
 
             public void onDeviceDisconnected() { //연결해제
-                Toast.makeText(MainActivity.this
-                        , "연결이 해제되었습니다.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "연결이 해제되었습니다.", Toast.LENGTH_SHORT).show();
                 sendBroadcast(new Intent("main_disconnected"));
             }
 
             public void onDeviceConnectionFailed() { //연결실패
-                Toast.makeText(MainActivity.this
-                        , "연결에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "연결에 실패하였습니다.", Toast.LENGTH_SHORT).show();
                 sendBroadcast(new Intent("main_failed"));
             }
         });
@@ -119,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         registerReceiver(broadcastReceiverDisconnect, new IntentFilter("main1_disconnect"));
+
     }
 
     void switchFragment(Fragment fragment) {

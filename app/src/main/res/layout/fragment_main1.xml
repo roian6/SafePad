@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
+        <variable
+            name="isAlert"
+            type="Boolean" />
 
         <variable
             name="onProgress"
@@ -42,12 +45,14 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_margin="16dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/round_box"
             android:elevation="4dp"
             android:padding="24dp"
             android:visibility="@{isConnected, default=visible}"
+            app:layout_constraintBottom_toTopOf="@+id/btn_main1_scan"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar_main1">
@@ -67,8 +72,8 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/productb"
                     android:includeFontPadding="false"
-                    android:text="@{name, default=`Device Name`}"
-                    android:textColor="@color/materialDarkBlack"
+                    android:text="@{name+(isAlert?`(alert)`:``), default=`Device Name`}"
+                    android:textColor="@{!isAlert?@color/materialDarkBlack:@color/materialRed, default=@color/materialDarkBlack}"
                     android:textSize="24sp"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintEnd_toStartOf="@+id/textView5"
@@ -95,7 +100,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/productb"
                     android:includeFontPadding="false"
-                    android:text="@{time, default=`0h 0m`}"
+                    android:text="@{time+` sec`, default=`0 sec`}"
                     android:textColor="@color/materialGray7"
                     android:textSize="20sp"
                     app:layout_constrainedWidth="true"
@@ -105,31 +110,15 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            <ImageView
-                android:scaleType="centerCrop"
-                android:id="@+id/imageView4"
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart_main1"
                 android:layout_width="match_parent"
-                android:layout_height="164dp"
-                android:layout_marginTop="8dp"
-                android:src="@drawable/tense"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
-
-            <Button
-                android:id="@+id/btn_main1_send"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/round_box"
-                android:backgroundTint="@color/colorPrimary"
-                android:fontFamily="@font/productb"
-                android:text="SEND MESSAGE"
-                android:textColor="@android:color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView4" />
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

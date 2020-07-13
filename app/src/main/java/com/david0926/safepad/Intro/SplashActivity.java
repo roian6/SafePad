@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.david0926.safepad.Auth.LoginActivity;
 import com.david0926.safepad.MainActivity;
 import com.david0926.safepad.R;
+import com.david0926.safepad.util.SharedPreferenceUtil;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class SplashActivity extends AppCompatActivity {
@@ -29,7 +30,8 @@ public class SplashActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //fullscreen
 
         new Handler().postDelayed(() -> {
-
+            SharedPreferenceUtil.putInt(this, "alert", 0);
+            SharedPreferenceUtil.putInt(this, "time", 0);
             boolean isLandingShown = getSharedPreferences(this).getBoolean("landing_shown", false);
             isLandingShown = false; //remove this line, to show landing page only once
 
